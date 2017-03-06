@@ -16,6 +16,7 @@ import android.view.View;
 
 import bootstrap.casterio.com.myapplication.fragment.ItemFragment;
 import bootstrap.casterio.com.myapplication.fragment.dummy.DummyContent;
+import bootstrap.casterio.com.myapplication.service.MyIntentService;
 
 public class TabbedActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
@@ -56,8 +57,13 @@ public class TabbedActivity extends AppCompatActivity implements ItemFragment.On
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            Snackbar.make(view, "Saving", Snackbar.LENGTH_LONG).show();
+
+            MyIntentService.startActionFoo(mViewPager.getContext(),
+                        "Caster", "Videos");
+
+            MyIntentService.startActionBaz(mViewPager.getContext(),
+                    "Bootstrap", "FTW");
             }
         });
 
