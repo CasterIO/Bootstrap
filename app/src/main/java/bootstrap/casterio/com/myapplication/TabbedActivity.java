@@ -15,7 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import bootstrap.casterio.com.myapplication.fragment.ItemFragment;
-import bootstrap.casterio.com.myapplication.fragment.dummy.DummyContent;
+import bootstrap.casterio.com.myapplication.model.Meme;
 import bootstrap.casterio.com.myapplication.service.MyIntentService;
 
 public class TabbedActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
@@ -93,7 +93,7 @@ public class TabbedActivity extends AppCompatActivity implements ItemFragment.On
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(Meme item) {
 
     }
 

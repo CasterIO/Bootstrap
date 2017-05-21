@@ -6,13 +6,22 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import bootstrap.casterio.com.myapplication.R;
-import bootstrap.casterio.com.myapplication.fragment.dummy.DummyContent;
-import bootstrap.casterio.com.myapplication.fragment.dummy.DummyContent.DummyItem;
+import bootstrap.casterio.com.myapplication.api.MemeClient;
+import bootstrap.casterio.com.myapplication.api.MemeInterface;
+import bootstrap.casterio.com.myapplication.model.Meme;
+import bootstrap.casterio.com.myapplication.model.PopularMemes;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A fragment representing a list of Items.
@@ -27,6 +36,12 @@ public class ItemFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
+    private MemeInterface apiInterface;
+
+    private MyItemRecyclerViewAdapter adapter;
+    private List<Meme> memesList;
+    private RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -57,19 +72,51 @@ public class ItemFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_item_list, container, false);
+        final View view = inflater.inflate(R.layout.fragment_item_list, container, false);
+        memesList = new ArrayList<>();
+        adapter = new MyItemRecyclerViewAdapter(memesList, mListener);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(adapter);
         }
+
+        apiInterface = MemeClient.getClient().create(MemeInterface.class);
+        Call<PopularMemes> call = apiInterface.loadMemes();
+        call.enqueue(new Callback<PopularMemes>() {
+            @Override
+            public void onResponse(Call<PopularMemes> call, Response<PopularMemes> response) {
+                Log.d("MSW", "Call: " + call.request().toString());
+                Log.d("MSW", response.code() + "<--- responseCode");
+                Log.d("MSW", "response successful: " + response.isSuccessful());
+                PopularMemes popularMemes = response.body();
+                memesList = popularMemes.getData().getMemes();
+                adapter = new MyItemRecyclerViewAdapter(memesList, mListener);
+                if (view instanceof RecyclerView) {
+                    Context context = view.getContext();
+                    recyclerView = (RecyclerView) view;
+                    if (mColumnCount <= 1) {
+                        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                    } else {
+                        recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+                    }
+                    recyclerView.setAdapter(adapter);
+                }
+                Log.d("MSW", "popular memes count is: " + popularMemes.getData().getMemes().size());
+            }
+
+            @Override
+            public void onFailure(Call<PopularMemes> call, Throwable t) {
+                Log.d("MSW", "response failure");
+            }
+        });
         return view;
     }
 
@@ -103,6 +150,6 @@ public class ItemFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(Meme item);
     }
 }
